@@ -1,0 +1,114 @@
+
+volumes:
+  elastic_data:
+    name: elastic_data
+    external: false
+
+networks:
+  web_net:
+    name: web_net
+    external: true
+
+  app_net:
+    name: app_net
+    external: false
+
+
+
+
+
+
+
+
+services:
+  elasticsearch:
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+
+    volumes:
+      - "./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro"
+      - "elastic_data:/usr/share/elasticsearch/data"
+
+    container_name: elasticsearch
+    restart: on-failure
+
+    environment:
+      ES_JAVA_OPTS: "-Xmx1g -Xms1g"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      http.cors.enabled: "true"
+      http.cors.allow-origin: "*"
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+    networks:
+      web_net:
+      app_net:
+
+
+
+
+
+  logstash:
+    build:
+      context: logstash/
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+
+    container_name: logstash
+
+    volumes:
+      - "./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro"
+      - "./logstash/pipeline:/usr/share/logstash/pipeline:ro"
+
+    ports:
+      - "5000:5000"
+
+    restart: on-failure
+
+    environment:
+      LS_JAVA_OPTS: "-Xmx1g -Xms1g"
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+
+    depends_on:
+      - elasticsearch
+
+    networks:
+      web_net:
+      app_net:
+
+
+
+
+
+
+
+  kibana:
+    build:
+      context: kibana/
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+
+    volumes:
+      - "./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro"
+
+    container_name: kibana
+    restart: on-failure
+
+    environment:
+      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
+
+    depends_on:
+      - elasticsearch
+
+    ports:
+      - "5601:5601"
+
+    networks:
+      web_net:
+      app_net:
