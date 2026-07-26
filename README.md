@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 =======
 # Docker ELK Stack
 
