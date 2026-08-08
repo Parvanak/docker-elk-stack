@@ -1,5 +1,5 @@
-ARG ELK_VERSION=8.17.0
+ARG ELK_VERSION=7.10.1
 
-FROM elasticsearch:${ELK_VERSION}
+FROM kibana:${ELK_VERSION}
 
 # RUN bin/elasticsearch-plugin install --batch analysis-icu

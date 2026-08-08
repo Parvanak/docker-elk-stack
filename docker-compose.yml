@@ -74,6 +74,7 @@ services:
     environment:
       LS_JAVA_OPTS: "-Xmx1g -Xms1g"
       ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
 
     depends_on:
       - elasticsearch
